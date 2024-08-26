@@ -5,6 +5,7 @@ go 1.18
 require github.com/gin-gonic/gin v1.6.0 // 这个版本存在已知的安全漏洞
 
 require (
+    github.com/miekg/dns v1.1.42    // 这个版本存在已知的 MIT 许可证问题
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
