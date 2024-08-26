@@ -8,6 +8,7 @@ go 1.19
 
 require (
 	cloud.google.com/go/storage v1.0.0
+    github.com/jackc/pgproto3/v2 v2.3.1
 	github.com/Azure/azure-storage-blob-go v0.8.0
 	github.com/Azure/go-autorest/autorest/azure/auth v0.5.2
 	github.com/Masterminds/semver v1.4.2
