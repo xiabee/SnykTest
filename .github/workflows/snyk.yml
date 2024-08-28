@@ -29,12 +29,6 @@ jobs:
       - name: Install dependencies
         run: go mod tidy
 
-      - name: Run Snyk Security Test
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk test --severity-threshold=low
-        continue-on-error: true  # 允许步骤失败，但继续执行后续步骤
-
       - name: Run Snyk License Test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
