@@ -22,4 +22,6 @@ func main() {
 		c.String(200, "Hello, World!")
 	})
 	fmt.Println("Gin server is set up but not running in this example.")
+	fmt.Println("Gin server is set up but not running in this example.")
+	fmt.Println("Gin server is set up but not running in this example.")
 }
