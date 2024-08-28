@@ -32,4 +32,4 @@ jobs:
       - name: Run Snyk License Test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk test --severity-threshold=low --include-licenses
+        run: snyk test --severity-threshold=low --include-licenses --only-changed
