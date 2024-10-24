@@ -3,7 +3,7 @@ module xiabee/Snyktest
 go 1.21
 
 require (
-	github.com/gin-gonic/gin v1.4.0 // 存在已知漏洞的组件
+	github.com/gin-gonic/gin v1.5.0 // 存在已知漏洞的组件
 	github.com/grafana/grafana-plugin-sdk-go v0.90.0 // 使用 AGPL-3.0 高风险许可证
 )
 
@@ -14,6 +14,8 @@ require (
 	github.com/cheekybits/genny v1.0.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
+	github.com/go-playground/locales v0.12.1 // indirect
+	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/flatbuffers v23.5.26+incompatible // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
@@ -24,6 +26,7 @@ require (
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/mattetti/filebuffer v1.0.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
@@ -47,6 +50,6 @@ require (
 	google.golang.org/genproto v0.0.0-20200911024640-645f7a48b24f // indirect
 	google.golang.org/grpc v1.65.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
-	gopkg.in/go-playground/validator.v8 v8.18.2 // indirect
+	gopkg.in/go-playground/validator.v9 v9.29.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
