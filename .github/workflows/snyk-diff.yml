@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - main
-  push:
 
 jobs:
   snyk:
@@ -26,7 +25,7 @@ jobs:
         id: diff
         run: |
           git fetch origin main
-          # Get the diff between main branch and the current PR branch for go.sum
+          # Check for changes in go.sum
           git diff origin/main HEAD go.sum > dependency-diff.txt
           if [ -s dependency-diff.txt ]; then
             echo "Dependencies changed in go.sum."
