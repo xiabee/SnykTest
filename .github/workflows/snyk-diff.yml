@@ -32,6 +32,7 @@ jobs:
             cat dependency-diff.txt
           else
             echo "No dependency changes detected."
+          fi
         continue-on-error: true
 
       # Step 4: Show Dependency Changes (for debug purposes)
