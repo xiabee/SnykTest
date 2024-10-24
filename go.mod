@@ -3,7 +3,7 @@ module xiabee/Snyktest
 go 1.21
 
 require (
-	github.com/gin-gonic/gin v1.4.0 // 存在已知漏洞的组件
+	github.com/gin-gonic/gin v1.5.0 // 存在已知漏洞的组件
 	github.com/grafana/grafana-plugin-sdk-go v0.90.0 // 使用 AGPL-3.0 高风险许可证
 )
 
