@@ -1,0 +1,52 @@
+name: Snyk Incremental Security Scan
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  snyk:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the current PR branch
+      - name: Checkout PR code
+        uses: actions/checkout@v3
+
+      # Step 2: Setup Go environment
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.18'  # 使用与你项目匹配的 Go 版本
+
+      # Step 3: Detect Dependency Changes in go.sum
+      - name: Detect Dependency Changes
+        id: diff
+        run: |
+          git fetch origin main
+          # Get the diff between main branch and the current PR branch for go.sum
+          git diff origin/main HEAD go.sum > dependency-diff.txt
+          if [ -s dependency-diff.txt ]; then
+            echo "Dependencies changed in go.sum."
+            cat dependency-diff.txt
+          else
+            echo "No dependency changes detected."
+        continue-on-error: true
+
+      # Step 4: Show Dependency Changes (for debug purposes)
+      - name: Show Dependency Changes
+        run: cat dependency-diff.txt
+
+      # Step 5: Run Snyk Test on Incremental Changes (if go.sum has changed)
+      - name: Run Snyk Test on Incremental Changes
+        if: steps.diff.outputs.changed-files == 'go.sum' || success()
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          if [ -s dependency-diff.txt ]; then
+            echo "Running Snyk test on changed dependencies."
+            snyk test --file=go.sum --severity-threshold=low
+          else
+            echo "No dependency changes detected, skipping Snyk test."
+          fi
