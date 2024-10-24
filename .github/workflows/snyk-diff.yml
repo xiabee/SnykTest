@@ -25,9 +25,11 @@ jobs:
         uses: snyk/actions/setup@master
 
       # Step 4: Authenticate Snyk
+      - name: Authenticate Snyk
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
       # Step 5: Install dependencies
+      - name: Install dependencies
         run: go mod tidy
 
       # Step 6: Detect Dependency Changes in go.sum
