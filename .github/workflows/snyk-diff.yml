@@ -11,22 +11,32 @@ jobs:
 
     steps:
       # Step 1: Checkout the current PR branch
-      - name: Checkout PR code
+      - name: Checkout code
         uses: actions/checkout@v3
 
       # Step 2: Setup Go environment
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.18'  # 使用与你项目匹配的 Go 版本
+          go-version: '1.21'
 
-      # Step 3: Detect Dependency Changes in go.sum
+      # Step 3: Install Snyk CLI using official action
+      - name: Install Snyk CLI
+        uses: snyk/actions/setup@master
+
+      # Step 4: Authenticate Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+      # Step 5: Install dependencies
+        run: go mod tidy
+
+      # Step 6: Detect Dependency Changes in go.sum
       - name: Detect Dependency Changes
         id: diff
         run: |
           git fetch origin main
-          # Check for changes in go.sum
-          git diff origin/main HEAD go.sum > dependency-diff.txt
+          # Get only the changes in go.sum (new dependencies added or updated)
+          git diff origin/main HEAD go.sum | grep '^+[^+]' > dependency-diff.txt
           if [ -s dependency-diff.txt ]; then
             echo "Dependencies changed in go.sum."
             cat dependency-diff.txt
@@ -35,11 +45,11 @@ jobs:
           fi
         continue-on-error: true
 
-      # Step 4: Show Dependency Changes (for debug purposes)
+      # Step 7: Show Dependency Changes (for debug purposes)
       - name: Show Dependency Changes
         run: cat dependency-diff.txt
 
-      # Step 5: Run Snyk Test on Incremental Changes (if go.sum has changed)
+      # Step 8: Run Snyk Test on Incremental Changes
       - name: Run Snyk Test on Incremental Changes
         if: steps.diff.outputs.changed-files == 'go.sum' || success()
         env:
@@ -47,7 +57,7 @@ jobs:
         run: |
           if [ -s dependency-diff.txt ]; then
             echo "Running Snyk test on changed dependencies."
-            snyk test --file=go.sum --severity-threshold=low
+            snyk test --package-manager=gomodules --target-file=dependency-diff.txt --severity-threshold=low
           else
             echo "No dependency changes detected, skipping Snyk test."
           fi
