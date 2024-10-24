@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
-	"time"
 )
 
 func main() {
