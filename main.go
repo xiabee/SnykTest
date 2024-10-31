@@ -2,10 +2,14 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
-	"time"
+	"github.com/urfave/negroni"
 )
 
 func main() {
@@ -24,9 +28,17 @@ func main() {
 	})
 	fmt.Println("Gin server is set up but not running in this example.")
 
-	// 使用 jwt-go 库示例
+	// 使用 jwt-go 库生成 JWT token
 	token := createJWTToken()
 	fmt.Println("Generated JWT token:", token)
+
+	// 使用 negroni 中间件示例
+	n := negroni.New()
+	n.Use(negroni.NewLogger())
+	n.UseHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello from Negroni!"))
+	}))
+	http.ListenAndServe(":3000", n)
 }
 
 // createJWTToken 使用 github.com/dgrijalva/jwt-go 库创建一个 JWT token
