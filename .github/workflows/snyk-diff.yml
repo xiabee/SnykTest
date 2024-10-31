@@ -41,7 +41,7 @@ jobs:
           git diff origin/main HEAD go.sum | grep '^+[^+]' > dependency-diff.txt
           git diff origin/main HEAD go.mod | grep '^+[^+]' >> dependency-diff.txt
           if [ -s dependency-diff.txt ]; then
-            echo "Dependencies changed in go.sum."
+            echo "Dependencies changed in go.sum and go.mod"
             cat dependency-diff.txt
           else
             echo "No dependency changes detected."
