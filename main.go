@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 )
 
@@ -22,6 +23,10 @@ func main() {
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "Hello, World from Gin!")
 	})
+
+	// 使用 uuid 生成一个示例 UUID
+	newUUID := uuid.New()
+	fmt.Println("Generated UUID:", newUUID)
 
 	// 启动 gin HTTP 服务器
 	go func() {
