@@ -35,9 +35,15 @@ jobs:
       - name: Install dependencies on base branch
         run: go mod tidy
 
-      # Step 6: Generate baseline report from the base branch
+      # Step 6: Generate baseline report from the base branch and save as artifact
       - name: Generate Baseline Snyk Report
         run: snyk test --package-manager=gomodules --severity-threshold=low --json > baseline-report.json || true
+
+      - name: Upload Baseline Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: baseline-report
+          path: baseline-report.json
 
       # Step 7: Checkout the current PR branch and generate the current report
       - name: Checkout current PR branch
@@ -48,13 +54,18 @@ jobs:
       - name: Install dependencies on PR branch
         run: go mod tidy
 
+      - name: Download Baseline Report Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: baseline-report
+
       - name: Generate Current Snyk Report
         run: snyk test --package-manager=gomodules --severity-threshold=low --json > current-report.json || true
 
       # Step 8: Compare baseline and current reports for new vulnerabilities
       - name: Compare Snyk Reports for New Vulnerabilities
         run: |
-          # 使用 jq 提取 baseline 和 current 的漏洞 ID
+          # 使用 jq 提取 baseline 和 current 的漏洞 ID，并对它们进行排序
           baseline_ids=$(jq -r '.vulnerabilities[].id' baseline-report.json | sort | uniq)
           current_ids=$(jq -r '.vulnerabilities[].id' current-report.json | sort | uniq)
 
