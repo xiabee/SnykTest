@@ -6,21 +6,23 @@ on:
       - main
 
 jobs:
-  snyk:
+  snyk-incremental-scan:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the current PR branch
+      # Step 1: Checkout code and fetch history
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2  # 获取上一次提交
 
-      # Step 2: Setup Go environment
-      - name: Setup Go
+      # Step 2: Set up Go environment
+      - name: Setup Go environment
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
 
-      # Step 3: Install Snyk CLI using official action
+      # Step 3: Install Snyk CLI
       - name: Install Snyk CLI
         uses: snyk/actions/setup@master
 
@@ -28,38 +30,38 @@ jobs:
       - name: Authenticate Snyk
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
-      # Step 5: Install dependencies
       - name: Install dependencies
         run: go mod tidy
 
-      # Step 6: Detect Dependency Changes in go.sum
-      - name: Detect Dependency Changes
-        id: diff
+      # Step 5: Generate baseline report from the last commit on main
+      - name: Generate Baseline Snyk Report
         run: |
-          git fetch origin main
-          # Get only the changes in go.sum  (new dependencies added or updated)
-          git diff origin/main HEAD go.sum | grep '^+[^+]' > dependency-diff.txt
-          if [ -s dependency-diff.txt ]; then
-            echo "Dependencies changed in go.sum"
-            cat dependency-diff.txt
-          else
-            echo "No dependency changes detected."
-          fi
-        continue-on-error: true
+          git checkout origin/main
+          snyk test --package-manager=gomodules --severity-threshold=low --json > baseline-report.json
 
-      # Step 7: Show Dependency Changes (for debug purposes)
-      - name: Show Dependency Changes
-        run: cat dependency-diff.txt
-
-      # Step 8: Run Snyk Test on Incremental Changes
-      - name: Run Snyk Test on Incremental Changes
-        if: steps.diff.outputs.changed-files == 'go.sum' || success()
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      # Step 6: Generate current report for the PR
+      - name: Generate Current Snyk Report
         run: |
-          if [ -s dependency-diff.txt ]; then
-            echo "Running Snyk test on changed dependencies."
-            snyk test --package-manager=gomodules --target-file=dependency-diff.txt --severity-threshold=low
+          git checkout ${{ github.event.pull_request.head.sha }}
+          snyk test --package-manager=gomodules --severity-threshold=low --json > current-report.json
+
+      # Step 7: Compare baseline and current reports for new vulnerabilities
+      - name: Compare Snyk Reports for New Vulnerabilities
+        run: |
+          # 使用 jq 提取 baseline 和 current 的漏洞 ID
+          baseline_ids=$(jq -r '.vulnerabilities[].id' baseline-report.json | sort | uniq)
+          current_ids=$(jq -r '.vulnerabilities[].id' current-report.json | sort | uniq)
+
+          # 查找 current 中存在但 baseline 中不存在的漏洞 ID
+          new_vulns=$(comm -13 <(echo "$baseline_ids") <(echo "$current_ids"))
+
+          if [ -n "$new_vulns" ]; then
+            echo "New vulnerabilities introduced in this PR:"
+            for vuln_id in $new_vulns; do
+              # 使用 jq 提取详细信息
+              jq --arg id "$vuln_id" '.vulnerabilities[] | select(.id == $id) | "\(.title) (ID: \(.id), Severity: \(.severity))\nDescription: \(.description)\nIntroduced through: \(.from | join(", "))\nMore info: \(.url)\n"' current-report.json
+            done
+            exit 1  # 如果有新漏洞，让 CI 失败
           else
-            echo "No dependency changes detected, skipping Snyk test."
+            echo "No new vulnerabilities introduced in this PR."
           fi
