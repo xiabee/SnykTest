@@ -17,6 +17,12 @@ jobs:
           ref: ${{ github.event.pull_request.base.sha }}  # 获取待合入分支的 commit
           fetch-depth: 1  # 只获取基准分支的提交
 
+      # Step 1.1 
+      - name: Verify Checked Out Base Branch
+        run: |
+          echo "Checked out commit:"
+          git log -1
+        
       # Step 2: Set up Go environment
       - name: Setup Go environment
         uses: actions/setup-go@v4
@@ -37,6 +43,7 @@ jobs:
 
       # Step 6: Generate baseline report from the base branch
       - name: Generate Baseline Snyk Report
+        working-directory: ${{ github.workspace }}
         run: snyk test --package-manager=gomodules --severity-threshold=low --json > baseline-report.json || true
 
       # Step 7: Checkout the current PR branch and generate the current report
