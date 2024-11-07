@@ -3,18 +3,19 @@ name: Snyk Incremental Security Scan
 on:
   pull_request:
     branches:
-      - main
+      - '*'  # 适用于所有分支
 
 jobs:
   snyk-incremental-scan:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code and fetch history
-      - name: Checkout code
+      # Step 1: Checkout the target branch (base branch) and fetch history
+      - name: Checkout base branch
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2  # 获取上一次提交
+          ref: ${{ github.event.pull_request.base.sha }}  # 获取待合入分支的 commit
+          fetch-depth: 1  # 只获取基准分支的提交
 
       # Step 2: Set up Go environment
       - name: Setup Go environment
@@ -27,25 +28,30 @@ jobs:
         uses: snyk/actions/setup@master
 
       # Step 4: Authenticate Snyk
-      - name: Authenticate Snyk
+      - name: Snyk Auth
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
-      - name: Install dependencies
+      # Step 5: Install dependencies on base branch
+      - name: Install dependencies on base branch
         run: go mod tidy
 
-      # Step 5: Generate baseline report from the last commit on main
+      # Step 6: Generate baseline report from the base branch
       - name: Generate Baseline Snyk Report
-        run: |
-          git checkout origin/main
-          snyk test --package-manager=gomodules --severity-threshold=low --json > baseline-report.json
+        run: snyk test --package-manager=gomodules --severity-threshold=low --json > baseline-report.json
 
-      # Step 6: Generate current report for the PR
+      # Step 7: Checkout the current PR branch and generate the current report
+      - name: Checkout current PR branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}  # PR 的最新提交
+
+      - name: Install dependencies on PR branch
+        run: go mod tidy
+
       - name: Generate Current Snyk Report
-        run: |
-          git checkout ${{ github.event.pull_request.head.sha }}
-          snyk test --package-manager=gomodules --severity-threshold=low --json > current-report.json
+        run: snyk test --package-manager=gomodules --severity-threshold=low --json > current-report.json
 
-      # Step 7: Compare baseline and current reports for new vulnerabilities
+      # Step 8: Compare baseline and current reports for new vulnerabilities
       - name: Compare Snyk Reports for New Vulnerabilities
         run: |
           # 使用 jq 提取 baseline 和 current 的漏洞 ID
