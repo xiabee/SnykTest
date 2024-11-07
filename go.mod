@@ -6,6 +6,7 @@ toolchain go1.23.2
 
 require (
 	github.com/gin-gonic/gin v1.6.0
+	github.com/google/uuid v1.6.0 // 引入无漏洞的组件
 	github.com/grafana/grafana-plugin-sdk-go v0.259.1
 )
 
@@ -34,7 +35,6 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/flatbuffers v23.5.26+incompatible // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/grafana/otel-profiling-go v0.5.1 // indirect
 	github.com/grafana/pyroscope-go/godeltaprof v0.1.8 // indirect
