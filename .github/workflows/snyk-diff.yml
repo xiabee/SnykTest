@@ -54,7 +54,7 @@ jobs:
       # Step 8: Compare baseline and current reports for new vulnerabilities
       - name: Compare Snyk Reports for New Vulnerabilities
         run: |
-          # 使用 jq 提取 baseline 和 current 的漏洞 ID
+          # 使用 jq 提取 baseline 和 current 的漏洞 ID，并对它们进行排序
           baseline_ids=$(jq -r '.vulnerabilities[].id' baseline-report.json | sort | uniq)
           current_ids=$(jq -r '.vulnerabilities[].id' current-report.json | sort | uniq)
 
