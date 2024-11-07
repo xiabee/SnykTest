@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/beego/beego/v2/server/web"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
@@ -24,6 +25,11 @@ func main() {
 		c.String(http.StatusOK, "Hello, World from Gin!")
 	})
 
+	// 使用 beego 库示例
+	beegoApp := web.NewHttpSever()
+	beegoApp.Router("/", &mainController{})
+	fmt.Println("Beego server setup complete but not running in this example.")
+
 	// 使用 uuid 生成一个示例 UUID
 	newUUID := uuid.New()
 	fmt.Println("Generated UUID:", newUUID)
@@ -37,4 +43,12 @@ func main() {
 
 	// 保持主进程运行一段时间（模拟实际使用）
 	select {}
+}
+
+type mainController struct {
+	web.Controller
+}
+
+func (m *mainController) Get() {
+	m.Ctx.WriteString("Hello, World from Beego!")
 }
