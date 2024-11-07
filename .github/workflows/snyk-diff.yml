@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the target branch (base branch) and fetch history
+      # Step 1: Checkout base branch
       - name: Checkout base branch
         uses: actions/checkout@v3
         with:
@@ -37,7 +37,7 @@ jobs:
 
       # Step 6: Generate baseline report from the base branch
       - name: Generate Baseline Snyk Report
-        run: snyk test --package-manager=gomodules --severity-threshold=low --json > baseline-report.json
+        run: snyk test --package-manager=gomodules --severity-threshold=low --json > baseline-report.json || true
 
       # Step 7: Checkout the current PR branch and generate the current report
       - name: Checkout current PR branch
@@ -49,7 +49,7 @@ jobs:
         run: go mod tidy
 
       - name: Generate Current Snyk Report
-        run: snyk test --package-manager=gomodules --severity-threshold=low --json > current-report.json
+        run: snyk test --package-manager=gomodules --severity-threshold=low --json > current-report.json || true
 
       # Step 8: Compare baseline and current reports for new vulnerabilities
       - name: Compare Snyk Reports for New Vulnerabilities
