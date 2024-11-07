@@ -27,8 +27,7 @@ jobs:
         uses: snyk/actions/setup@master
 
       # Step 4: Authenticate Snyk
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Authenticate Snyk
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
       - name: Install dependencies
