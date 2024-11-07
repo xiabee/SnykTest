@@ -3,7 +3,7 @@ name: Snyk Incremental Security Scan
 on:
   pull_request:
     branches:
-      - '*'  # 适用于所有分支
+      - '*'  # Applies to all branches
 
 jobs:
   snyk-incremental-scan:
@@ -14,8 +14,8 @@ jobs:
       - name: Checkout base branch
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.base.sha }}  # 获取待合入分支的 commit
-          fetch-depth: 1  # 只获取基准分支的提交
+          ref: ${{ github.event.pull_request.base.sha }}  # Get the commit of the base branch
+          fetch-depth: 1  # Fetch only the latest commit of the base branch
 
       # Step 2: Set up Go environment
       - name: Setup Go environment
@@ -49,7 +49,7 @@ jobs:
       - name: Checkout current PR branch
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.sha }}  # PR 的最新提交
+          ref: ${{ github.event.pull_request.head.sha }}  # Latest commit of the PR branch
 
       - name: Install dependencies on PR branch
         run: go mod tidy
@@ -65,20 +65,20 @@ jobs:
       # Step 8: Compare baseline and current reports for new vulnerabilities
       - name: Compare Snyk Reports for New Vulnerabilities
         run: |
-          # 使用 jq 提取 baseline 和 current 的漏洞 ID，并对它们进行排序
+          # Extract vulnerability IDs from baseline and current reports and sort them
           baseline_ids=$(jq -r '.vulnerabilities[].id' baseline-report.json | sort | uniq)
           current_ids=$(jq -r '.vulnerabilities[].id' current-report.json | sort | uniq)
 
-          # 查找 current 中存在但 baseline 中不存在的漏洞 ID
+          # Find IDs present in current but not in baseline report
           new_vulns=$(comm -13 <(echo "$baseline_ids") <(echo "$current_ids"))
 
           if [ -n "$new_vulns" ]; then
             echo "New vulnerabilities introduced in this PR:"
             for vuln_id in $new_vulns; do
-              # 使用 jq 提取详细信息
+              # Extract detailed information for each new vulnerability
               jq --arg id "$vuln_id" '.vulnerabilities[] | select(.id == $id) | "\(.title) (ID: \(.id), Severity: \(.severity))\nDescription: \(.description)\nIntroduced through: \(.from | join(", "))\nMore info: \(.url)\n"' current-report.json
             done
-            exit 1  # 如果有新漏洞，让 CI 失败
+            exit 1  # Fail CI if new vulnerabilities are found
           else
             echo "No new vulnerabilities introduced in this PR."
           fi
